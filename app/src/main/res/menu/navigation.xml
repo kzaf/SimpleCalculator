@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_calculator"
+        android:icon="@drawable/calculator_navigation"
+        android:title="@string/title_calculator" />
+
+    <item
+        android:id="@+id/navigation_currency"
+        android:icon="@drawable/currency_navigator"
+        android:title="@string/title_currency" />
+
+</menu>
