@@ -8,8 +8,98 @@
     tools:context=".Calculator">
 
     <TableLayout
+        android:id="@+id/currency_table"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:padding="30dp">
+
+            <Spinner
+                android:id="@+id/from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left" />
+
+            <Spinner
+                android:id="@+id/to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/equivalent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="equivalent" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:padding="30dp">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/input_value"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="0">
+
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:id="@+id/equals_sign"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="=" />
+
+            <TextView
+                android:id="@+id/converted_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="result" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="50dp"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/convert_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Convert" />
+        </TableRow>
+
+    </TableLayout>
+
+    <TableLayout
+        android:id="@+id/calculator_table"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="*"
+        android:visibility="visible"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
 
