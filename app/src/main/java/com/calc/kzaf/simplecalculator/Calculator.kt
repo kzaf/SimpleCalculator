@@ -28,7 +28,7 @@ class Calculator : AppCompatActivity() {
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener{ item ->
         when (item.itemId) {
             R.id.navigation_calculator -> {
-                calculator_table.visibility = View.VISIBLE
+                calculator_linear_laout.visibility = View.VISIBLE
                 currency_table.visibility = View.INVISIBLE
                 clearScreen()
                 first_number.text = "0"
@@ -36,7 +36,7 @@ class Calculator : AppCompatActivity() {
             }
             R.id.navigation_currency -> {
                 currency_table.visibility = View.VISIBLE
-                calculator_table.visibility = View.INVISIBLE
+                calculator_linear_laout.visibility = View.INVISIBLE
                 return@OnNavigationItemSelectedListener true
             }
         }
