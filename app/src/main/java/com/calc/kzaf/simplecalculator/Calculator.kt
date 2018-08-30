@@ -25,7 +25,7 @@ class Calculator : AppCompatActivity() {
         validateCurrencyButtons()
     }
 
-    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener{ item ->
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_calculator -> {
                 calculator_linear_laout.visibility = View.VISIBLE
@@ -43,22 +43,22 @@ class Calculator : AppCompatActivity() {
         false
     }
 
-    private fun validateCalculatorButtons(){
-        zero.setOnClickListener  { updateNumbers(0) }
-        one.setOnClickListener   { updateNumbers(1) }
-        two.setOnClickListener   { updateNumbers(2) }
+    private fun validateCalculatorButtons() {
+        zero.setOnClickListener { updateNumbers(0) }
+        one.setOnClickListener { updateNumbers(1) }
+        two.setOnClickListener { updateNumbers(2) }
         three.setOnClickListener { updateNumbers(3) }
-        four.setOnClickListener  { updateNumbers(4) }
-        five.setOnClickListener  { updateNumbers(5) }
-        six.setOnClickListener   { updateNumbers(6) }
+        four.setOnClickListener { updateNumbers(4) }
+        five.setOnClickListener { updateNumbers(5) }
+        six.setOnClickListener { updateNumbers(6) }
         seven.setOnClickListener { updateNumbers(7) }
         eight.setOnClickListener { updateNumbers(8) }
-        nine.setOnClickListener  { updateNumbers(9) }
+        nine.setOnClickListener { updateNumbers(9) }
 
-        add_button.setOnClickListener      { updateSymbols("+") }
-        sub_button.setOnClickListener      { updateSymbols("-") }
+        add_button.setOnClickListener { updateSymbols("+") }
+        sub_button.setOnClickListener { updateSymbols("-") }
         multiply_button.setOnClickListener { updateSymbols("*") }
-        div_button.setOnClickListener      { updateSymbols("/") }
+        div_button.setOnClickListener { updateSymbols("/") }
 
         comma.setOnClickListener { commaUpdate() }
 
@@ -70,23 +70,23 @@ class Calculator : AppCompatActivity() {
         }
     }
 
-    private fun validateCurrencyButtons(){
-        convert_button.setOnClickListener{ currencyConvert() }
+    private fun validateCurrencyButtons() {
+        convert_button.setOnClickListener { currencyConvert() }
     }
 
     // Calculator Methods
-    private fun clearScreen(){
+    private fun clearScreen() {
         second_num.text = "0"
         second_num.visibility = View.INVISIBLE
         operator.visibility = View.INVISIBLE
     }
 
-    private fun updateSymbols(symbol : String){
+    private fun updateSymbols(symbol: String) {
         operator.text = symbol
         operator.visibility = View.VISIBLE
     }
 
-    private fun commaUpdate(){
+    private fun commaUpdate() {
         when {
             operator.visibility == View.VISIBLE -> when {
                 !second_num.text.contains(".") -> {
@@ -98,7 +98,7 @@ class Calculator : AppCompatActivity() {
         }
     }
 
-    private fun updateNumbers(number: Int){
+    private fun updateNumbers(number: Int) {
         when {
             operator.visibility == View.VISIBLE -> {
                 second_num.visibility = View.VISIBLE
@@ -115,7 +115,7 @@ class Calculator : AppCompatActivity() {
     }
 
     private fun calculate() {
-        if (!(first_number.text.toString().toDouble().isNaN() || second_num.text.toString().toDouble().isNaN())){
+        if (!(first_number.text.toString().toDouble().isNaN() || second_num.text.toString().toDouble().isNaN())) {
 
             var valueOne = first_number.text.toString().toDouble()
             val valueTwo = second_num.text.toString().toDouble()
@@ -141,20 +141,35 @@ class Calculator : AppCompatActivity() {
 
     // Currency Methods
     private fun currencyConvert() {
-        sendRequest()
+        getRequest()
     }
 
-    private fun sendRequest() {
+    private fun getRequest() {
         val url = "http://data.fixer.io/api/latest?access_key=2f75648f00880488578eabf872c617c5"
-        val progressDialog = ProgressDialog(this)
-        progressDialog.show()
-        MySingleton.getInstance(this)
-                .addToRequestQueue(
-                        JsonObjectRequest(Request.Method.GET, url, null,
-                            Response.Listener { response: JSONObject? ->
-                                equivalent.text  = "Response: %s".format(response.toString()) },
-                            Response.ErrorListener { error: VolleyError? ->
-                                Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show() }))
-        progressDialog.dismiss()
-        }
+
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
+                Response.Listener { response ->
+                    equivalent.text = "Response: %s".format(response.toString())
+                    completionHandler(response)
+                },
+                Response.ErrorListener { error ->
+                    Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
+                    completionHandler(null)
+                }
+        )
+
+        val a = jsonObjectRequest.body
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
+
     }
+
+    private fun completionHandler(response: JSONObject?) {
+        var base = response?.getString("base")
+        var rates = response?.getJSONObject("rates")
+
+        var ratesEUR = rates?.getString("EUR")
+
+    }
+}
