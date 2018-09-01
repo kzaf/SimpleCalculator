@@ -157,9 +157,6 @@ class Calculator : AppCompatActivity() {
                     completionHandler(null)
                 }
         )
-
-        val a = jsonObjectRequest.body
-
         // Access the RequestQueue through your singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
 
