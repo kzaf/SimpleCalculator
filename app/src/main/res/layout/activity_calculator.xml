@@ -332,11 +332,11 @@
                 android:paddingRight="20dp">
 
                 <TextView
-                    android:id="@+id/equivalent"
+                    android:id="@+id/converted_currency_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Converted Currency" />
+                    android:text="CONVERTED CURRENCY" />
 
                 <TextView
                     android:id="@+id/currency_result"
@@ -371,7 +371,7 @@
                     android:id="@+id/amount_label"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Amount" />
+                    android:text="AMOUNT" />
 
                 <EditText
                     android:id="@+id/editText"
@@ -410,14 +410,14 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
                         android:layout_marginRight="20dp"
-                        android:text="From" />
+                        android:text="FROM" />
 
                     <TextView
                         android:id="@+id/to_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:text="To" />
+                        android:text="TO" />
                 </TableRow>
 
                 <TableRow
@@ -448,15 +448,15 @@
                     android:gravity="center">
 
                     <TextView
-                        android:id="@+id/textView6"
+                        android:id="@+id/equivalent_from"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:layout_marginRight="30dp"
-                        android:text="TextView" />
+                        android:layout_marginRight="10dp"
+                        android:text="1€ = 0,8$" />
 
                     <TextView
-                        android:id="@+id/textView5"
+                        android:id="@+id/equivalent_to"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"

@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
@@ -18,6 +17,9 @@ class Calculator : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calculator)
+
+        val actionBar = supportActionBar
+        actionBar?.title = "Calculator"
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
@@ -32,11 +34,17 @@ class Calculator : AppCompatActivity() {
                 currency_table.visibility = View.INVISIBLE
                 clearScreen()
                 first_number.text = "0"
+                val actionBar = supportActionBar
+                actionBar?.title = "Calculator"
+
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_currency -> {
                 currency_table.visibility = View.VISIBLE
                 calculator_linear_laout.visibility = View.INVISIBLE
+                val actionBar = supportActionBar
+                actionBar?.title = "Currency Converter"
+
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -149,7 +157,7 @@ class Calculator : AppCompatActivity() {
 
         val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
-                    equivalent.text = "Response: %s".format(response.toString())
+                    //equivalent.text = "Response: %s".format(response.toString())
                     completionHandler(response)
                 },
                 Response.ErrorListener { error ->
@@ -157,16 +165,27 @@ class Calculator : AppCompatActivity() {
                     completionHandler(null)
                 }
         )
-        // Access the RequestQueue through your singleton class.
+        // Access the RequestQueue through singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
-
     }
 
     private fun completionHandler(response: JSONObject?) {
         var base = response?.getString("base")
-        var rates = response?.getJSONObject("rates")
+        val rates = response?.getJSONObject("rates")
 
-        var ratesEUR = rates?.getString("EUR")
+        val ratesEUR = rates?.getString("EUR")
+        val ratesUSD = rates?.getString("USD")
+        val from = calculateEquivalent(ratesEUR!!.toDouble(), ratesUSD!!.toDouble(), 1.0)
+        val to = calculateEquivalent(ratesUSD!!.toDouble(), ratesEUR!!.toDouble(), 1.0)
 
+        equivalent_from.text = "1€ = " + to.take(4) + "$"
+        equivalent_to.text = "1$ = " + from.take(4) + "€"
+    }
+
+    private fun calculateEquivalent(currency1: Double, currency2: Double, amount: Double): String{
+
+        val result = (amount * currency1) / currency2
+
+        return result.toString()
     }
 }
