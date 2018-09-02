@@ -311,7 +311,6 @@
         android:id="@+id/currency_table"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
         android:visibility="visible"
         tools:layout_editor_absoluteX="10dp"
         tools:layout_editor_absoluteY="9dp">
@@ -338,15 +337,31 @@
                     android:gravity="center"
                     android:text="CONVERTED CURRENCY" />
 
-                <TextView
-                    android:id="@+id/currency_result"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:paddingBottom="20dp"
-                    android:paddingTop="20dp"
-                    android:text="0"
-                    android:textSize="30sp" />
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="6"
+                        android:gravity="center"
+                        android:text="$"
+                        android:textSize="30sp" />
+
+                    <TextView
+                        android:id="@+id/currency_result"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="start"
+                        android:padding="20dp"
+                        android:paddingStart="1dp"
+                        android:text="0"
+                        android:textSize="30sp" />
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -374,12 +389,15 @@
                     android:text="AMOUNT" />
 
                 <EditText
-                    android:id="@+id/editText"
+                    android:id="@+id/amount_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_edittext"
                     android:gravity="left"
+                    android:hint="0"
                     android:inputType="numberDecimal"
-                    android:text="0" />
+                    android:padding="10dp"
+                    android:textSize="20sp" />
             </LinearLayout>
 
         </TableRow>
@@ -430,15 +448,13 @@
                         android:id="@+id/from_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
-                        android:layout_marginRight="20dp" />
+                        android:layout_gravity="left" />
 
                     <Spinner
                         android:id="@+id/to_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="20dp" />
+                        android:layout_gravity="right" />
                 </TableRow>
 
                 <TableRow
@@ -452,16 +468,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:layout_marginRight="10dp"
-                        android:text="1€ = 0,8$" />
+                        android:layout_marginRight="10dp" />
 
                     <TextView
                         android:id="@+id/equivalent_to"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginLeft="40dp"
-                        android:text="TextView" />
+                        android:layout_marginLeft="40dp" />
                 </TableRow>
 
             </TableLayout>
@@ -482,6 +496,7 @@
                 android:layout_marginRight="50dp"
                 android:layout_weight="1"
                 android:autoText="false"
+                android:background="@android:color/holo_green_dark"
                 android:text="Convert" />
         </TableRow>
 

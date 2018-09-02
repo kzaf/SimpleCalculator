@@ -1,10 +1,12 @@
 package com.calc.kzaf.simplecalculator
 
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
@@ -44,6 +46,7 @@ class Calculator : AppCompatActivity() {
                 calculator_linear_laout.visibility = View.INVISIBLE
                 val actionBar = supportActionBar
                 actionBar?.title = "Currency Converter"
+                getRequest()
 
                 return@OnNavigationItemSelectedListener true
             }
@@ -157,35 +160,41 @@ class Calculator : AppCompatActivity() {
 
         val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
                 Response.Listener { response ->
-                    //equivalent.text = "Response: %s".format(response.toString())
                     completionHandler(response)
                 },
                 Response.ErrorListener { error ->
                     Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
-                    completionHandler(null)
                 }
         )
-        // Access the RequestQueue through singleton class.
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun completionHandler(response: JSONObject?) {
-        var base = response?.getString("base")
-        val rates = response?.getJSONObject("rates")
+        val ratesCollection = collectAllRates(response?.getJSONObject("rates")!!)
 
-        val ratesEUR = rates?.getString("EUR")
-        val ratesUSD = rates?.getString("USD")
-        val from = calculateEquivalent(ratesEUR!!.toDouble(), ratesUSD!!.toDouble(), 1.0)
-        val to = calculateEquivalent(ratesUSD!!.toDouble(), ratesEUR!!.toDouble(), 1.0)
+        equivalent_from.text = "1€ ≈ " + calculateEquivalent(ratesCollection["USD"]!!, ratesCollection["EUR"]!!, 1).take(4) + "$"
+        equivalent_to.text = "1$ ≈ " + calculateEquivalent(ratesCollection["EUR"]!!, ratesCollection["USD"]!!, 1).take(4) + "€"
 
-        equivalent_from.text = "1€ = " + to.take(4) + "$"
-        equivalent_to.text = "1$ = " + from.take(4) + "€"
+        var currencyNames = ArrayList(ratesCollection.keys)
+        var currencyValues = ArrayList(ratesCollection.values)
+
+        from_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
+        to_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
     }
 
-    private fun calculateEquivalent(currency1: Double, currency2: Double, amount: Double): String{
+    private fun collectAllRates(rates: JSONObject): HashMap<String, Any>{
+        val ratesHashMap: HashMap<String, Any> = hashMapOf()
 
-        val result = (amount * currency1) / currency2
+        for (i in 0 until rates.names().length()) {
+            val key = rates.names().getString(i)
+            val value = rates.get(key)
 
-        return result.toString()
+            ratesHashMap[key] = value
+        }
+        return ratesHashMap
     }
+
+    private fun calculateEquivalent(currency1: Any, currency2: Any, amount: Any): String =
+            (amount.toString().toDouble() * currency1.toString().toDouble() / currency2.toString().toDouble()).toString()
 }
