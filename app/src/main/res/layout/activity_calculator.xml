@@ -427,7 +427,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:layout_marginRight="20dp"
+                        android:layout_weight="1"
                         android:text="FROM" />
 
                     <TextView
@@ -435,6 +435,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
+                        android:layout_weight="1"
                         android:text="TO" />
                 </TableRow>
 
@@ -446,15 +447,21 @@
 
                     <Spinner
                         android:id="@+id/from_spinner"
+                        style="@style/Widget.AppCompat.Spinner.DropDown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left" />
+                        android:layout_gravity="left"
+                        android:layout_weight="1"
+                        android:spinnerMode="dialog" />
 
                     <Spinner
                         android:id="@+id/to_spinner"
+                        style="@style/Widget.AppCompat.Spinner.DropDown"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="right" />
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:spinnerMode="dialog" />
                 </TableRow>
 
                 <TableRow
@@ -468,14 +475,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="start"
-                        android:layout_marginRight="10dp" />
+                        android:layout_weight="1" />
 
                     <TextView
                         android:id="@+id/equivalent_to"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginLeft="40dp" />
+                        android:layout_weight="1" />
                 </TableRow>
 
             </TableLayout>

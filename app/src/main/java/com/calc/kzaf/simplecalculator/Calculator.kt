@@ -13,6 +13,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
+import java.util.*
 
 class Calculator : AppCompatActivity() {
 
@@ -24,6 +25,7 @@ class Calculator : AppCompatActivity() {
         actionBar?.title = "Calculator"
 
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        getRequest() // Load the currency values onCreate
 
         validateCalculatorButtons()
         validateCurrencyButtons()
@@ -46,7 +48,7 @@ class Calculator : AppCompatActivity() {
                 calculator_linear_laout.visibility = View.INVISIBLE
                 val actionBar = supportActionBar
                 actionBar?.title = "Currency Converter"
-                getRequest()
+
 
                 return@OnNavigationItemSelectedListener true
             }
@@ -152,7 +154,11 @@ class Calculator : AppCompatActivity() {
 
     // Currency Methods
     private fun currencyConvert() {
-        getRequest()
+        currency_result.text =
+                calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
+                                    ratesCollection[to_spinner.selectedItem.toString()]!!,
+                                    amount_value.text).take(5)
+
     }
 
     private fun getRequest() {
@@ -169,15 +175,16 @@ class Calculator : AppCompatActivity() {
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
 
+    private var ratesCollection = HashMap<String, Any>()
     @SuppressLint("SetTextI18n")
     private fun completionHandler(response: JSONObject?) {
-        val ratesCollection = collectAllRates(response?.getJSONObject("rates")!!)
+        ratesCollection = collectAllRates(response?.getJSONObject("rates")!!)
 
         equivalent_from.text = "1€ ≈ " + calculateEquivalent(ratesCollection["USD"]!!, ratesCollection["EUR"]!!, 1).take(4) + "$"
         equivalent_to.text = "1$ ≈ " + calculateEquivalent(ratesCollection["EUR"]!!, ratesCollection["USD"]!!, 1).take(4) + "€"
 
-        var currencyNames = ArrayList(ratesCollection.keys)
-        var currencyValues = ArrayList(ratesCollection.values)
+        val currencyNames = ArrayList(ratesCollection.keys)
+        currencyNames.sort()
 
         from_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
         to_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
@@ -197,4 +204,4 @@ class Calculator : AppCompatActivity() {
 
     private fun calculateEquivalent(currency1: Any, currency2: Any, amount: Any): String =
             (amount.toString().toDouble() * currency1.toString().toDouble() / currency2.toString().toDouble()).toString()
-}
+    }
