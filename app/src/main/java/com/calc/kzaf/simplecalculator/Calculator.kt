@@ -154,11 +154,16 @@ class Calculator : AppCompatActivity() {
 
     // Currency Methods
     private fun currencyConvert() {
-        currency_result.text =
-                calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
-                                    ratesCollection[to_spinner.selectedItem.toString()]!!,
-                                    amount_value.text).take(5)
-
+        if (!amount_value.text.isNullOrEmpty()){
+            currency_result.text =
+                    calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
+                            ratesCollection[to_spinner.selectedItem.toString()]!!,
+                            amount_value.text!!).take(9)
+            currency_symbol.text = to_spinner.selectedItem.toString()
+        }
+        else{
+            Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun getRequest() {
