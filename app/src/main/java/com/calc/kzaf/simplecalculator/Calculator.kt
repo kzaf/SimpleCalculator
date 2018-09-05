@@ -1,7 +1,6 @@
 package com.calc.kzaf.simplecalculator
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
@@ -99,6 +98,7 @@ class Calculator : AppCompatActivity() {
         operator.visibility = View.VISIBLE
     }
 
+    @SuppressLint("SetTextI18n")
     private fun commaUpdate() {
         when {
             operator.visibility == View.VISIBLE -> when {
@@ -111,6 +111,7 @@ class Calculator : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateNumbers(number: Int) {
         when {
             operator.visibility == View.VISIBLE -> {
@@ -153,6 +154,7 @@ class Calculator : AppCompatActivity() {
     }
 
     // Currency Methods
+    @SuppressLint("SetTextI18n")
     private fun currencyConvert() {
         if (!amount_value.text.isNullOrEmpty()){
             currency_result.text =
@@ -160,6 +162,12 @@ class Calculator : AppCompatActivity() {
                             ratesCollection[to_spinner.selectedItem.toString()]!!,
                             amount_value.text!!).take(9)
             currency_symbol.text = to_spinner.selectedItem.toString()
+
+            equivalent_from.text = "1 " + from_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
+                    ratesCollection[to_spinner.selectedItem.toString()]!!, 1).take(4) + " " + to_spinner.selectedItem.toString()
+            equivalent_to.text = "1 " + to_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(ratesCollection[to_spinner.selectedItem.toString()]!!,
+                    ratesCollection[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
+
         }
         else{
             Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
@@ -181,12 +189,9 @@ class Calculator : AppCompatActivity() {
     }
 
     private var ratesCollection = HashMap<String, Any>()
-    @SuppressLint("SetTextI18n")
+
     private fun completionHandler(response: JSONObject?) {
         ratesCollection = collectAllRates(response?.getJSONObject("rates")!!)
-
-        equivalent_from.text = "1€ ≈ " + calculateEquivalent(ratesCollection["USD"]!!, ratesCollection["EUR"]!!, 1).take(4) + "$"
-        equivalent_to.text = "1$ ≈ " + calculateEquivalent(ratesCollection["EUR"]!!, ratesCollection["USD"]!!, 1).take(4) + "€"
 
         val currencyNames = ArrayList(ratesCollection.keys)
         currencyNames.sort()
