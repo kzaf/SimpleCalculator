@@ -84,6 +84,7 @@ class Calculator : AppCompatActivity() {
 
     private fun validateCurrencyButtons() {
         convert_button.setOnClickListener { currencyConvert() }
+        swap.setOnClickListener{ swapCurrencies() }
     }
 
     // Calculator Methods
@@ -155,8 +156,8 @@ class Calculator : AppCompatActivity() {
 
     // Currency Methods
     @SuppressLint("SetTextI18n")
-    private fun currencyConvert() {
-        if (!amount_value.text.isNullOrEmpty()){
+    private fun currencyConvert() = when {
+        !amount_value.text.isNullOrEmpty() -> {
             currency_result.text =
                     calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
                             ratesCollection[to_spinner.selectedItem.toString()]!!,
@@ -169,9 +170,16 @@ class Calculator : AppCompatActivity() {
                     ratesCollection[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
 
         }
-        else{
-            Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
-        }
+        else -> Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun swapCurrencies(){
+        val fromSpinnerIndex = from_spinner.selectedItemPosition
+
+        from_spinner.setSelection(to_spinner.selectedItemPosition)
+        to_spinner.setSelection(fromSpinnerIndex)
+
+        currencyConvert()
     }
 
     private fun getRequest() {
@@ -203,7 +211,7 @@ class Calculator : AppCompatActivity() {
     private fun collectAllRates(rates: JSONObject): HashMap<String, Any>{
         val ratesHashMap: HashMap<String, Any> = hashMapOf()
 
-        for (i in 0 until rates.names().length()) {
+        (0 until rates.names().length()).forEach { i ->
             val key = rates.names().getString(i)
             val value = rates.get(key)
 
