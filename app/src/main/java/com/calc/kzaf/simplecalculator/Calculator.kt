@@ -38,6 +38,7 @@ class Calculator : AppCompatActivity() {
                 clearScreen()
                 first_number.text = "0"
                 val actionBar = supportActionBar
+                clearCurrencyScreen()
                 actionBar?.title = "Calculator"
 
                 return@OnNavigationItemSelectedListener true
@@ -85,6 +86,7 @@ class Calculator : AppCompatActivity() {
     private fun validateCurrencyButtons() {
         convert_button.setOnClickListener { currencyConvert() }
         swap.setOnClickListener{ swapCurrencies() }
+        clear_button.setOnClickListener{ clearCurrencyScreen() }
     }
 
     // Calculator Methods
@@ -173,6 +175,16 @@ class Calculator : AppCompatActivity() {
         else -> Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
     }
 
+    private fun clearCurrencyScreen(){
+        currency_result.text = null
+        amount_value.text = null
+        equivalent_from.text = null
+        equivalent_to.text = null
+
+        from_spinner.setSelection(0)
+        to_spinner.setSelection(0)
+    }
+
     private fun swapCurrencies(){
         val fromSpinnerIndex = from_spinner.selectedItemPosition
 
@@ -204,8 +216,11 @@ class Calculator : AppCompatActivity() {
         val currencyNames = ArrayList(ratesCollection.keys)
         currencyNames.sort()
 
-        from_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
-        to_spinner.adapter = ArrayAdapter(this, android.R.layout.simple_expandable_list_item_1, currencyNames)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencyNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        from_spinner.adapter = adapter
+        to_spinner.adapter = adapter
     }
 
     private fun collectAllRates(rates: JSONObject): HashMap<String, Any>{
