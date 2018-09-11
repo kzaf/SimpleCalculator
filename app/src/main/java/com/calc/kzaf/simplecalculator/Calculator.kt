@@ -259,11 +259,8 @@ class Calculator : AppCompatActivity() {
             val keyNames = names!!.names().getString(i)
             val valueNames = names.get(keyNames).toString()
 
-            try {
-                if(keyRates == keyNames){ currencyCodesAndSymbols[valueNames] = valueRates }
-            }
-            catch (e: Exception){
-                Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show() }
+            if(keyRates == keyNames){ currencyCodesAndSymbols[valueNames] = valueRates }
+
         }
         return currencyCodesAndSymbols
     }
