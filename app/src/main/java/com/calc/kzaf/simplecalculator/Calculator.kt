@@ -1,10 +1,12 @@
 package com.calc.kzaf.simplecalculator
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.android.volley.Request
@@ -13,7 +15,9 @@ import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
 import java.util.*
+import kotlin.collections.ArrayList
 
+@Suppress("IMPLICIT_CAST_TO_ANY")
 class Calculator : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +38,7 @@ class Calculator : AppCompatActivity() {
         when (item.itemId) {
             R.id.navigation_calculator -> {
                 calculator_linear_laout.visibility = View.VISIBLE
-                currency_table.visibility = View.INVISIBLE
+                currency_linear_layout.visibility = View.INVISIBLE
                 clearScreen()
                 first_number.text = "0"
                 val actionBar = supportActionBar
@@ -44,7 +48,7 @@ class Calculator : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_currency -> {
-                currency_table.visibility = View.VISIBLE
+                currency_linear_layout.visibility = View.VISIBLE
                 calculator_linear_laout.visibility = View.INVISIBLE
                 val actionBar = supportActionBar
                 actionBar?.title = "Currency Converter"
@@ -144,7 +148,13 @@ class Calculator : AppCompatActivity() {
                 operator.text.toString() === "/" -> valueOne /= valueTwo
             }
 
-            first_number.text = valueOne.toString()
+            // Checks if result is a whole number or not
+            if (valueOne - Math.floor(valueOne) == 0.0){
+                val formatted = String.format("%.0f", valueOne)
+                first_number.text = formatted
+            }else{
+                first_number.text = valueOne.toString()
+            }
             clearScreen()
 
         } else {
@@ -160,16 +170,22 @@ class Calculator : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun currencyConvert() = when {
         !amount_value.text.isNullOrEmpty() -> {
+
+            val namesAndValuesMap = matchCurrencyNamesWithCodes(symbolsResponse, namesResponse)
+
             currency_result.text =
-                    calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
-                            ratesCollection[to_spinner.selectedItem.toString()]!!,
+                    calculateEquivalent(namesAndValuesMap[from_spinner.selectedItem.toString()]!!,
+                            namesAndValuesMap[to_spinner.selectedItem.toString()]!!,
                             amount_value.text!!).take(9)
             currency_symbol.text = to_spinner.selectedItem.toString()
 
-            equivalent_from.text = "1 " + from_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(ratesCollection[from_spinner.selectedItem.toString()]!!,
-                    ratesCollection[to_spinner.selectedItem.toString()]!!, 1).take(4) + " " + to_spinner.selectedItem.toString()
-            equivalent_to.text = "1 " + to_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(ratesCollection[to_spinner.selectedItem.toString()]!!,
-                    ratesCollection[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
+            equivalent_from.text = "1 " + from_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(namesAndValuesMap[from_spinner.selectedItem.toString()]!!,
+                    namesAndValuesMap[to_spinner.selectedItem.toString()]!!, 1).take(4) + " " + to_spinner.selectedItem.toString()
+            equivalent_to.text = "1 " + to_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(namesAndValuesMap[to_spinner.selectedItem.toString()]!!,
+                    namesAndValuesMap[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
+
+            val inputManager:InputMethodManager =getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
 
         }
         else -> Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
@@ -194,33 +210,69 @@ class Calculator : AppCompatActivity() {
         currencyConvert()
     }
 
+    private var symbolsResponse: JSONObject? = null
+    private var namesResponse: JSONObject? = null
     private fun getRequest() {
-        val url = "http://data.fixer.io/api/latest?access_key=2f75648f00880488578eabf872c617c5"
+        val urlCurrencyRates = "http://data.fixer.io/api/latest?access_key=2f75648f00880488578eabf872c617c5"
+        val urlCurrencySymbols = "http://data.fixer.io/api/symbols?access_key=2f75648f00880488578eabf872c617c5"
 
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null,
+        val jsonObjectRequestRates = JsonObjectRequest(Request.Method.GET, urlCurrencyRates, null,
                 Response.Listener { response ->
-                    completionHandler(response)
+                    completionHandlerForRates(response)
+                    symbolsResponse = response.getJSONObject("rates")
                 },
                 Response.ErrorListener { error ->
                     Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
                 }
         )
-        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestRates)
+
+        val jsonObjectRequestSymbols = JsonObjectRequest(Request.Method.GET, urlCurrencySymbols, null,
+                Response.Listener { response ->
+                    completionHandlerForSymbols(response)
+                    namesResponse = response.getJSONObject("symbols")
+                },
+                Response.ErrorListener { error ->
+                    Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
+                }
+        )
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestSymbols)
+    }
+
+    private var symbolsCollection = HashMap<String, Any>()
+    private fun completionHandlerForSymbols(response: JSONObject?){
+        symbolsCollection = collectAllRates(response?.getJSONObject("symbols")!!)
     }
 
     private var ratesCollection = HashMap<String, Any>()
-
-    private fun completionHandler(response: JSONObject?) {
+    private fun completionHandlerForRates(response: JSONObject?) {
         ratesCollection = collectAllRates(response?.getJSONObject("rates")!!)
 
         val currencyNames = ArrayList(ratesCollection.keys)
         currencyNames.sort()
 
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencyNames)
+        val currencySymbols = ArrayList(symbolsCollection.values)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, currencySymbols)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         from_spinner.adapter = adapter
         to_spinner.adapter = adapter
+        from_spinner.setTitle("From")
+        to_spinner.setTitle("To")
+    }
+
+    private val currencyCodesAndSymbols: HashMap<String, Any> = hashMapOf()
+    private fun matchCurrencyNamesWithCodes(rates: JSONObject?, names: JSONObject?): HashMap<String, Any>{
+
+        for (i in 0 until rates!!.names().length()) {
+            val keyRates = rates.names().getString(i)
+            val valueRates = rates.get(keyRates)
+            val keyNames = names!!.names().getString(i)
+            val valueNames = names.get(keyNames).toString()
+            if(keyRates == keyNames){ currencyCodesAndSymbols[valueNames] = valueRates }
+        }
+        return currencyCodesAndSymbols
     }
 
     private fun collectAllRates(rates: JSONObject): HashMap<String, Any>{
