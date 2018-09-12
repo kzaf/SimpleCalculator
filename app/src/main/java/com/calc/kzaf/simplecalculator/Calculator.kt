@@ -1,10 +1,12 @@
 package com.calc.kzaf.simplecalculator
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.android.volley.Request
@@ -15,6 +17,7 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
+@Suppress("IMPLICIT_CAST_TO_ANY")
 class Calculator : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -180,6 +183,9 @@ class Calculator : AppCompatActivity() {
                     namesAndValuesMap[to_spinner.selectedItem.toString()]!!, 1).take(4) + " " + to_spinner.selectedItem.toString()
             equivalent_to.text = "1 " + to_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(namesAndValuesMap[to_spinner.selectedItem.toString()]!!,
                     namesAndValuesMap[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
+
+            val inputManager:InputMethodManager =getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
 
         }
         else -> Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
