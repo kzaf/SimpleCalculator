@@ -145,7 +145,13 @@ class Calculator : AppCompatActivity() {
                 operator.text.toString() === "/" -> valueOne /= valueTwo
             }
 
-            first_number.text = valueOne.toString()
+            // Checks if result is a whole number or not
+            if (valueOne - Math.floor(valueOne) == 0.0){
+                val formatted = String.format("%.0f", valueOne)
+                first_number.text = formatted
+            }else{
+                first_number.text = valueOne.toString()
+            }
             clearScreen()
 
         } else {
@@ -252,15 +258,12 @@ class Calculator : AppCompatActivity() {
     private val currencyCodesAndSymbols: HashMap<String, Any> = hashMapOf()
     private fun matchCurrencyNamesWithCodes(rates: JSONObject?, names: JSONObject?): HashMap<String, Any>{
 
-        val length = rates!!.names().length()
-        for (i in 0 until length) {
+        for (i in 0 until rates!!.names().length()) {
             val keyRates = rates.names().getString(i)
             val valueRates = rates.get(keyRates)
             val keyNames = names!!.names().getString(i)
             val valueNames = names.get(keyNames).toString()
-
             if(keyRates == keyNames){ currencyCodesAndSymbols[valueNames] = valueRates }
-
         }
         return currencyCodesAndSymbols
     }
