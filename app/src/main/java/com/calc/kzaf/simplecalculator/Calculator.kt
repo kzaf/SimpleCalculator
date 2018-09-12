@@ -35,7 +35,7 @@ class Calculator : AppCompatActivity() {
         when (item.itemId) {
             R.id.navigation_calculator -> {
                 calculator_linear_laout.visibility = View.VISIBLE
-                currency_table.visibility = View.INVISIBLE
+                currency_linear_layout.visibility = View.INVISIBLE
                 clearScreen()
                 first_number.text = "0"
                 val actionBar = supportActionBar
@@ -45,7 +45,7 @@ class Calculator : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_currency -> {
-                currency_table.visibility = View.VISIBLE
+                currency_linear_layout.visibility = View.VISIBLE
                 calculator_linear_laout.visibility = View.INVISIBLE
                 val actionBar = supportActionBar
                 actionBar?.title = "Currency Converter"
@@ -236,7 +236,6 @@ class Calculator : AppCompatActivity() {
     private var symbolsCollection = HashMap<String, Any>()
     private fun completionHandlerForSymbols(response: JSONObject?){
         symbolsCollection = collectAllRates(response?.getJSONObject("symbols")!!)
-
     }
 
     private var ratesCollection = HashMap<String, Any>()
@@ -253,6 +252,8 @@ class Calculator : AppCompatActivity() {
 
         from_spinner.adapter = adapter
         to_spinner.adapter = adapter
+        from_spinner.setTitle("From")
+        to_spinner.setTitle("To")
     }
 
     private val currencyCodesAndSymbols: HashMap<String, Any> = hashMapOf()
