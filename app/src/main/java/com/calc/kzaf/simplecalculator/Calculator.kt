@@ -2,6 +2,7 @@ package com.calc.kzaf.simplecalculator
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Paint
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
@@ -16,9 +17,14 @@ import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
+import android.graphics.Paint.UNDERLINE_TEXT_FLAG
+
+
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
 class Calculator : AppCompatActivity() {
+
+    private var noConnectionFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,27 +43,40 @@ class Calculator : AppCompatActivity() {
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_calculator -> {
-                calculator_linear_laout.visibility = View.VISIBLE
-                currency_linear_layout.visibility = View.INVISIBLE
-                clearScreen()
-                first_number.text = "0"
-                val actionBar = supportActionBar
-                clearCurrencyScreen()
-                actionBar?.title = "Calculator"
-
+                initializeCalculatorScreen()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_currency -> {
-                currency_linear_layout.visibility = View.VISIBLE
-                calculator_linear_laout.visibility = View.INVISIBLE
-                val actionBar = supportActionBar
-                actionBar?.title = "Currency Converter"
+                if (!noConnectionFlag){
+                    initializeCurrencyScreen()
+                    return@OnNavigationItemSelectedListener true
+                }else{
+                    Toast.makeText(this, "No internet connection! Check connections and try again!", Toast.LENGTH_SHORT).show()
+                    getRequest() // Load the currency values onCreate
+                }
 
-
-                return@OnNavigationItemSelectedListener true
             }
         }
         false
+    }
+
+    private fun initializeCalculatorScreen(){
+        calculator_linear_laout.visibility = View.VISIBLE
+        currency_linear_layout.visibility = View.INVISIBLE
+        clearScreen()
+        first_number.text = "0"
+        val actionBar = supportActionBar
+        clearCurrencyScreen()
+        actionBar?.title = "Calculator"
+    }
+
+    private fun initializeCurrencyScreen(){
+        currency_linear_layout.visibility = View.VISIBLE
+        calculator_linear_laout.visibility = View.INVISIBLE
+        val actionBar = supportActionBar
+        actionBar?.title = "Currency Converter"
+
+
     }
 
     private fun validateCalculatorButtons() {
@@ -149,11 +168,12 @@ class Calculator : AppCompatActivity() {
             }
 
             // Checks if result is a whole number or not
-            if (valueOne - Math.floor(valueOne) == 0.0){
-                val formatted = String.format("%.0f", valueOne)
-                first_number.text = formatted
-            }else{
-                first_number.text = valueOne.toString()
+            when {
+                valueOne - Math.floor(valueOne) == 0.0 -> {
+                    val formatted = String.format("%.0f", valueOne)
+                    first_number.text = formatted
+                }
+                else -> first_number.text = valueOne.toString()
             }
             clearScreen()
 
@@ -162,7 +182,6 @@ class Calculator : AppCompatActivity() {
             } catch (e: Exception) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show()
             }
-
         }
     }
 
@@ -183,10 +202,11 @@ class Calculator : AppCompatActivity() {
                     namesAndValuesMap[to_spinner.selectedItem.toString()]!!, 1).take(4) + " " + to_spinner.selectedItem.toString()
             equivalent_to.text = "1 " + to_spinner.selectedItem.toString() + " ≈ " + calculateEquivalent(namesAndValuesMap[to_spinner.selectedItem.toString()]!!,
                     namesAndValuesMap[from_spinner.selectedItem.toString()]!!, 1).take(4) + " "+from_spinner.selectedItem.toString()
+            equivalent_to.paintFlags = equivalent_to.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            equivalent_from.paintFlags = equivalent_from.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
             val inputManager:InputMethodManager =getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
-
         }
         else -> Toast.makeText(this, "Please set an amount", Toast.LENGTH_SHORT).show()
     }
@@ -196,6 +216,7 @@ class Calculator : AppCompatActivity() {
         amount_value.text = null
         equivalent_from.text = null
         equivalent_to.text = null
+        currency_symbol.text = null
 
         from_spinner.setSelection(0)
         to_spinner.setSelection(0)
@@ -220,9 +241,10 @@ class Calculator : AppCompatActivity() {
                 Response.Listener { response ->
                     completionHandlerForRates(response)
                     symbolsResponse = response.getJSONObject("rates")
+                    noConnectionFlag = false
                 },
                 Response.ErrorListener { error ->
-                    Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
+                    noConnectionFlag = true
                 }
         )
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestRates)
@@ -231,9 +253,10 @@ class Calculator : AppCompatActivity() {
                 Response.Listener { response ->
                     completionHandlerForSymbols(response)
                     namesResponse = response.getJSONObject("symbols")
+                    noConnectionFlag = false
                 },
                 Response.ErrorListener { error ->
-                    Toast.makeText(this, error?.message, Toast.LENGTH_SHORT).show()
+                    noConnectionFlag = true
                 }
         )
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestSymbols)
