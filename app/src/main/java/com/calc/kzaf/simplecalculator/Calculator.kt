@@ -17,8 +17,6 @@ import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
-import android.graphics.Paint.UNDERLINE_TEXT_FLAG
-
 
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -311,5 +309,5 @@ class Calculator : AppCompatActivity() {
     }
 
     private fun calculateEquivalent(currency1: Any, currency2: Any, amount: Any): String =
-            (amount.toString().toDouble() * currency1.toString().toDouble() / currency2.toString().toDouble()).toString()
+            (amount.toString().toDouble() * currency2.toString().toDouble() / currency1.toString().toDouble()).toString()
     }
