@@ -18,7 +18,6 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 @Suppress("IMPLICIT_CAST_TO_ANY")
 class Calculator : AppCompatActivity() {
 
@@ -52,7 +51,6 @@ class Calculator : AppCompatActivity() {
                     Toast.makeText(this, "No internet connection! Check connections and try again!", Toast.LENGTH_SHORT).show()
                     getRequest() // Load the currency values onCreate
                 }
-
             }
         }
         false
@@ -62,7 +60,7 @@ class Calculator : AppCompatActivity() {
         calculator_linear_laout.visibility = View.VISIBLE
         currency_linear_layout.visibility = View.INVISIBLE
         clearScreen()
-        first_number.text = "0"
+        expression.text = ""
         val actionBar = supportActionBar
         clearCurrencyScreen()
         actionBar?.title = "Calculator"
@@ -73,35 +71,29 @@ class Calculator : AppCompatActivity() {
         calculator_linear_laout.visibility = View.INVISIBLE
         val actionBar = supportActionBar
         actionBar?.title = "Currency Converter"
-
-
     }
 
     private fun validateCalculatorButtons() {
-        zero.setOnClickListener { updateNumbers(0) }
-        one.setOnClickListener { updateNumbers(1) }
-        two.setOnClickListener { updateNumbers(2) }
-        three.setOnClickListener { updateNumbers(3) }
-        four.setOnClickListener { updateNumbers(4) }
-        five.setOnClickListener { updateNumbers(5) }
-        six.setOnClickListener { updateNumbers(6) }
-        seven.setOnClickListener { updateNumbers(7) }
-        eight.setOnClickListener { updateNumbers(8) }
-        nine.setOnClickListener { updateNumbers(9) }
+        zero.setOnClickListener { updateExpressionNumber("0") }
+        one.setOnClickListener { updateExpressionNumber("1") }
+        two.setOnClickListener { updateExpressionNumber("2") }
+        three.setOnClickListener { updateExpressionNumber("3") }
+        four.setOnClickListener { updateExpressionNumber("4") }
+        five.setOnClickListener { updateExpressionNumber("5") }
+        six.setOnClickListener { updateExpressionNumber("6") }
+        seven.setOnClickListener { updateExpressionNumber("7") }
+        eight.setOnClickListener { updateExpressionNumber("8") }
+        nine.setOnClickListener { updateExpressionNumber("9") }
+        comma.setOnClickListener { updateExpressionNumber("."); comma.isClickable = false}
 
-        add_button.setOnClickListener { updateSymbols("+") }
-        sub_button.setOnClickListener { updateSymbols("-") }
-        multiply_button.setOnClickListener { updateSymbols("*") }
-        div_button.setOnClickListener { updateSymbols("/") }
-
-        comma.setOnClickListener { commaUpdate() }
+        add_button.setOnClickListener { updateExpressionSymbol("+") }
+        sub_button.setOnClickListener { updateExpressionSymbol("-") }
+        multiply_button.setOnClickListener { updateExpressionSymbol("*") }
+        div_button.setOnClickListener { updateExpressionSymbol("/") }
 
         result.setOnClickListener { calculate() }
 
-        clear.setOnClickListener {
-            clearScreen()
-            first_number.text = "0"
-        }
+        clear.setOnClickListener { clearScreen(); expression.text = "" }
     }
 
     private fun validateCurrencyButtons() {
@@ -111,69 +103,65 @@ class Calculator : AppCompatActivity() {
     }
 
     // Calculator Methods
-    private fun clearScreen() {
-        second_num.text = "0"
-        second_num.visibility = View.INVISIBLE
-        operator.visibility = View.INVISIBLE
-    }
-
-    private fun updateSymbols(symbol: String) {
-        operator.text = symbol
-        operator.visibility = View.VISIBLE
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun commaUpdate() {
+    private var firstNum = ""
+    private var secondNum = ""
+    private var symbolVar = ""
+    private fun updateExpressionNumber(number: String){
         when {
-            operator.visibility == View.VISIBLE -> when {
-                !second_num.text.contains(".") -> {
-                    second_num.visibility = View.VISIBLE
-                    second_num.text = second_num.text.toString() + "."
-                }
+            expression.length() < 15 || calculated -> {
+                val alreadyExistingExpression = expression.text
+                expression.text = "$alreadyExistingExpression$number"
+                if (firstNum == "") firstNum = number
+                if (symbolVar != "") secondNum += number
+                if(calculated){ alreadyCalculatedNumber(number) }
             }
-            !first_number.text.contains(".") -> first_number.text = first_number.text.toString() + "."
+            else -> Toast.makeText(this, "Too long expression", Toast.LENGTH_SHORT).show()
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun updateNumbers(number: Int) {
+    private fun updateExpressionSymbol(symbol: String){
         when {
-            operator.visibility == View.VISIBLE -> {
-                second_num.visibility = View.VISIBLE
+            expression.length() < 15 || calculated -> {
+                val alreadyExistingExpression = expression.text
+                firstNum = alreadyExistingExpression.toString()
                 when {
-                    second_num.text.toString() == "0" -> second_num.text = number.toString()
-                    else -> second_num.text = second_num.text.toString() + number.toString()
+                    firstNum != "" && symbolVar == "" -> {
+                        expression.text = "$firstNum $symbol "
+                        symbolVar = symbol
+                        comma.isClickable = true
+                    }
                 }
+                if(calculated){ alreadyCalculatedSymbol(symbol) }
             }
-            else -> when {
-                first_number.text.toString() == "0" -> first_number.text = number.toString()
-                else -> first_number.text = first_number.text.toString() + number.toString()
-            }
+            else -> Toast.makeText(this, "Too long expression", Toast.LENGTH_SHORT).show()
         }
     }
 
+    private var calculated = false
     private fun calculate() {
-        if (!(first_number.text.toString().toDouble().isNaN() || second_num.text.toString().toDouble().isNaN())) {
-
-            var valueOne = first_number.text.toString().toDouble()
-            val valueTwo = second_num.text.toString().toDouble()
+        if (firstNum != "" && secondNum != "" && symbolVar != "") {
+            
+            var valueOne = firstNum.toDouble()
+            val valueTwo = secondNum.toDouble()
+            operator.text = "="
 
             when {
-                operator.text.toString() === "+" -> valueOne += valueTwo
-                operator.text.toString() === "-" -> valueOne -= valueTwo
-                operator.text.toString() === "*" -> valueOne *= valueTwo
-                operator.text.toString() === "/" -> valueOne /= valueTwo
+                symbolVar === "+" -> valueOne += valueTwo
+                symbolVar === "-" -> valueOne -= valueTwo
+                symbolVar === "*" -> valueOne *= valueTwo
+                symbolVar === "/" -> valueOne /= valueTwo
             }
 
             // Checks if result is a whole number or not
             when {
                 valueOne - Math.floor(valueOne) == 0.0 -> {
                     val formatted = String.format("%.0f", valueOne)
-                    first_number.text = formatted
+                    calc_result.text = formatted
                 }
-                else -> first_number.text = valueOne.toString()
+                else -> calc_result.text = valueOne.toString()
             }
-            clearScreen()
+            calculated = true
+            comma.isClickable = false
 
         } else {
             try {
@@ -182,6 +170,40 @@ class Calculator : AppCompatActivity() {
             }
         }
     }
+
+    private fun alreadyCalculatedNumber(number: String) {
+        comma.isClickable = true
+        firstNum = number
+        symbolVar = ""
+        secondNum = ""
+        expression.text = number
+        operator.text = ""
+        calc_result.text = ""
+        calculated = false
+    }
+
+    private fun alreadyCalculatedSymbol(symbol: String) {
+        val result = calc_result.text
+        firstNum = result.toString()
+        symbolVar = symbol
+        secondNum = ""
+        expression.text = "$result $symbol "
+        operator.text = ""
+        calc_result.text = ""
+        calculated = false
+    }
+
+    private fun clearScreen() {
+        calc_result.text = ""
+        operator.text = ""
+        firstNum = ""
+        secondNum = ""
+        symbolVar = ""
+        comma.isClickable = true
+        calculated = false
+    }
+
+
 
     // Currency Methods
     @SuppressLint("SetTextI18n")
