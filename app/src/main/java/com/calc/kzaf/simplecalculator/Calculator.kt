@@ -4,14 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
-import android.support.v7.app.AppCompatActivity
+import android.os.Handler
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import kotlinx.android.synthetic.main.activity_calculator.*
 import org.json.JSONObject
@@ -21,7 +23,16 @@ import kotlin.collections.ArrayList
 @Suppress("IMPLICIT_CAST_TO_ANY")
 class Calculator : AppCompatActivity() {
 
+    private var firstNum = ""
+    private var secondNum = ""
+    private var symbolVar = ""
+
+    private var calculated = false
+
     private var noConnectionFlag = false
+
+    private var symbolsResponse: JSONObject? = null
+    private var namesResponse: JSONObject? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +78,8 @@ class Calculator : AppCompatActivity() {
     }
 
     private fun initializeCurrencyScreen(){
+        getRequest()
+
         currency_linear_layout.visibility = View.VISIBLE
         calculator_linear_laout.visibility = View.INVISIBLE
         val actionBar = supportActionBar
@@ -103,9 +116,6 @@ class Calculator : AppCompatActivity() {
     }
 
     // Calculator Methods
-    private var firstNum = ""
-    private var secondNum = ""
-    private var symbolVar = ""
     private fun updateExpressionNumber(number: String){
         when {
             expression.length() < 15 || calculated -> {
@@ -137,10 +147,9 @@ class Calculator : AppCompatActivity() {
         }
     }
 
-    private var calculated = false
     private fun calculate() {
         if (firstNum != "" && secondNum != "" && symbolVar != "") {
-            
+
             var valueOne = firstNum.toDouble()
             val valueTwo = secondNum.toDouble()
             operator.text = "="
@@ -251,35 +260,31 @@ class Calculator : AppCompatActivity() {
         currencyConvert()
     }
 
-    private var symbolsResponse: JSONObject? = null
-    private var namesResponse: JSONObject? = null
     private fun getRequest() {
         val urlCurrencyRates = "http://data.fixer.io/api/latest?access_key=2f75648f00880488578eabf872c617c5"
         val urlCurrencySymbols = "http://data.fixer.io/api/symbols?access_key=2f75648f00880488578eabf872c617c5"
 
-        val jsonObjectRequestRates = JsonObjectRequest(Request.Method.GET, urlCurrencyRates, null,
+        MySingleton.getInstance(this).addToRequestQueue(JsonObjectRequest(Request.Method.GET, urlCurrencyRates, null,
                 Response.Listener { response ->
                     completionHandlerForRates(response)
                     symbolsResponse = response.getJSONObject("rates")
                     noConnectionFlag = false
                 },
-                Response.ErrorListener { error ->
+                Response.ErrorListener {
                     noConnectionFlag = true
                 }
-        )
-        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestRates)
+        ))
 
-        val jsonObjectRequestSymbols = JsonObjectRequest(Request.Method.GET, urlCurrencySymbols, null,
+        MySingleton.getInstance(this).addToRequestQueue(JsonObjectRequest(Request.Method.GET, urlCurrencySymbols, null,
                 Response.Listener { response ->
                     completionHandlerForSymbols(response)
                     namesResponse = response.getJSONObject("symbols")
                     noConnectionFlag = false
                 },
-                Response.ErrorListener { error ->
+                Response.ErrorListener {
                     noConnectionFlag = true
                 }
-        )
-        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequestSymbols)
+        ))
     }
 
     private var symbolsCollection = HashMap<String, Any>()
